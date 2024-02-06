@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shopping_list_app/data/categories.dart';
-import 'package:shopping_list_app/models/category.dart';
+// import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/models/grocery_item.dart';
 import 'package:shopping_list_app/widgets/new_item.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -21,6 +21,7 @@ class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
 
   var _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -33,6 +34,13 @@ class _GroceryListState extends State<GroceryList> {
         'shopping-list-app-988a0-default-rtdb.europe-west1.firebasedatabase.app',
         'shopping-list.json');
     final response = await http.get(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _error = 'Failed to fetch data. Please try again later.';
+      });
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
     final List<GroceryItem> loadedItems = [];
     for (final item in listData.entries) {
@@ -126,6 +134,11 @@ class _GroceryListState extends State<GroceryList> {
         },
       );
     }
+
+    if (_error != null) {
+      content = Center(child: Text(_error!));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Grocieries'),
